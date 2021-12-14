@@ -2,21 +2,30 @@ package br.com.letscode.navalbatle;
 
 public class GameControl {
 
-    public static String[][] table = new String[10][10];
+    private String[][] table = new String[10][10];
 
     public String[][] getTable() {
-        return table;
+        return this.table;
     }
 
-    public void placePlayerShips(String[] unconvertedCoords){
+    public String[][] placeShips(String[] unconvertedCoords){
         int[][] allShipsCoords = convertCoords(unconvertedCoords);
+
+        this.placePlayerShips(allShipsCoords);
+        this.placeComputerShips();
+
+        return this.table;
+    }
+
+    private void placePlayerShips(int[][] allShipsCoords){
 
         for (int[] shipCoords : allShipsCoords){
             table[shipCoords[0]][shipCoords[1]] = "N";
         }
+
     }
 
-    public void placeComputerShips(){
+    private void placeComputerShips(){
         int[][] allShipsCoords = new int[10][2];
 
         for (int i = 0; i < allShipsCoords.length; i++){

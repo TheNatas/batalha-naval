@@ -9,8 +9,12 @@ public class Display {
         Scanner in = new Scanner(System.in);
 
         printHeader();
-        GameControl ctrl = new GameControl();
-        // ctrl.getTable(), ctrl.placePlayerShips(), etc
+        GameControl ctrl = new GameControl(); // Ex.: ctrl.placePlayerShips()
+
+        // placeShips(String[] coords) => retorna a matriz atualizada
+        // (filtrar para mostrar ao usuário apenas o que ele deve ver)
+        // * as coordenadas podem ser passadas como letra para a linha
+        // * e número para a coluna, conforme o modelo do PDF
     }
 
     private static void printHeader() {
@@ -18,7 +22,6 @@ public class Display {
         System.out.println("                    JOGADOR");
         System.out.println("---------------------------------------------");
         System.out.println("|   | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |");
-        // missing lines
     }
 
 }
