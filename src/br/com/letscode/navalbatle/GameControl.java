@@ -75,7 +75,6 @@ public class GameControl {
             }
             convertedCoords[i][1] = coordsY;
         }
-
         return convertedCoords;
     }
 }
