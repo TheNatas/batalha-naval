@@ -4,11 +4,11 @@ public class GameControl {
 
     public static String[][] table = new String[10][10];
 
-    public static String[][] getTable() {
+    public String[][] getTable() {
         return table;
     }
 
-    public static void placePlayerShips(String[] unconvertedCoords){
+    public void placePlayerShips(String[] unconvertedCoords){
         int[][] allShipsCoords = convertCoords(unconvertedCoords);
 
         for (int[] shipCoords : allShipsCoords){
@@ -16,7 +16,7 @@ public class GameControl {
         }
     }
 
-    public static void placeComputerShips(){
+    public void placeComputerShips(){
         int[][] allShipsCoords = new int[10][2];
 
         for (int i = 0; i < allShipsCoords.length; i++){
@@ -35,7 +35,7 @@ public class GameControl {
         }
     }
 
-    private static int[][] convertCoords(String[] shipsCoords) {
+    private int[][] convertCoords(String[] shipsCoords) {
         int[][] convertedCoords = new int[10][2];
 
         for(int i = 0; i < shipsCoords.length; i++){

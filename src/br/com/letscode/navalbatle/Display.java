@@ -9,7 +9,8 @@ public class Display {
         Scanner in = new Scanner(System.in);
 
         printHeader();
-
+        GameControl ctrl = new GameControl();
+        // ctrl.getTable(), ctrl.placePlayerShips(), etc
     }
 
     private static void printHeader() {
@@ -17,6 +18,7 @@ public class Display {
         System.out.println("                    JOGADOR");
         System.out.println("---------------------------------------------");
         System.out.println("|   | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |");
+        // missing lines
     }
 
 }
