@@ -20,27 +20,22 @@ public class GameControl {
     private void placePlayerShips(int[][] allShipsCoords){
 
         for (int[] shipCoords : allShipsCoords){
-            table[shipCoords[0]][shipCoords[1]] = "N";
+            table[shipCoords[0]][shipCoords[1]] = "\uD83D\uDEA2";
         }
 
     }
 
     private void placeComputerShips(){
-        int[][] allShipsCoords = new int[10][2];
+        for (int i = 0; i < 10; i++){
+            int[] shipCoords = new int[2];
 
-        for (int i = 0; i < allShipsCoords.length; i++){
-            for (int j = 0; j < allShipsCoords[i].length; j++){
-                allShipsCoords[i][j] = (int) (Math.random() * 10);
+            do{
+                shipCoords[0] = (int) (Math.random() * 10);
+                shipCoords[1] = (int) (Math.random() * 10);
             }
-            if (table[allShipsCoords[i][0]][allShipsCoords[i][1]] == "C"){
+            while (this.table[shipCoords[0]][shipCoords[1]] == "C");
 
-            }else{
-                table[allShipsCoords[i][0]][allShipsCoords[i][1]] = "C";
-            }
-        }
-
-        for (int[] shipCoords : allShipsCoords){
-            table[shipCoords[0]][shipCoords[1]] = "C";
+            this.table[shipCoords[0]][shipCoords[1]] = "C";
         }
     }
 
@@ -50,40 +45,47 @@ public class GameControl {
         for(int i = 0; i < shipsCoords.length; i++){
             int coordsY = Integer.parseInt(Character.toString(shipsCoords[i].charAt(1)));
 
-            switch (shipsCoords[i].toUpperCase().charAt(0)){
-                case 'A':
-                    convertedCoords[i][0] = 0;
-                    break;
-                case 'B':
-                    convertedCoords[i][0] = 1;
-                    break;
-                case 'C':
-                    convertedCoords[i][0] = 2;
-                    break;
-                case 'D':
-                    convertedCoords[i][0] = 3;
-                    break;
-                case 'E':
-                    convertedCoords[i][0] = 4;
-                    break;
-                case 'F':
-                    convertedCoords[i][0] = 5;
-                    break;
-                case 'G':
-                    convertedCoords[i][0] = 6;
-                    break;
-                case 'H':
-                    convertedCoords[i][0] = 7;
-                    break;
-                case 'I':
-                    convertedCoords[i][0] = 8;
-                    break;
-                case 'J':
-                    convertedCoords[i][0] = 9;
-                    break;
-            }
+            char shipsCoordsFirstChar = shipsCoords[i].toUpperCase().charAt(0);
+            convertedCoords[i][0] = this.switchLetterToCorrespondentInt(shipsCoordsFirstChar);
+
             convertedCoords[i][1] = coordsY;
         }
         return convertedCoords;
+    }
+
+    public void play(String shipCoords){
+        int coordsX = this.switchLetterToCorrespondentInt(shipCoords.charAt(0));
+        int coordsY = Integer.parseInt(Character.toString(shipCoords.charAt(1)));
+
+        // return new Play(new int[]{coordsX , coordsY});
+    }
+
+    private int switchLetterToCorrespondentInt(char letter){
+
+        switch (letter){
+            case 'A':
+                return 0;
+            case 'B':
+                return 1;
+            case 'C':
+                return 2;
+            case 'D':
+                return 3;
+            case 'E':
+                return 4;
+            case 'F':
+                return 5;
+            case 'G':
+                return 6;
+            case 'H':
+                return 7;
+            case 'I':
+                return 8;
+            case 'J':
+                return 9;
+            default:
+                return 10;
+        }
+
     }
 }

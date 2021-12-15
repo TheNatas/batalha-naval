@@ -6,8 +6,6 @@ public class Display {
 
     public static void main(String[] args) {
 
-        Scanner in = new Scanner(System.in);
-
         printHeader();
         GameControl ctrl = new GameControl(); // Ex.: ctrl.placePlayerShips()
 
@@ -15,6 +13,8 @@ public class Display {
         // (filtrar para mostrar ao usuário apenas o que ele deve ver)
         // * as coordenadas podem ser passadas como letra para a linha
         // * e número para a coluna, conforme o modelo do PDF
+
+
     }
 
     private static void printHeader() {
