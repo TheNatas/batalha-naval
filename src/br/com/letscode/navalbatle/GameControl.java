@@ -2,7 +2,7 @@ package br.com.letscode.navalbatle;
 
 public class GameControl {
 
-    private String[][] table = new String[10][10];
+    private static String[][] table = new String[10][10];
 
     public String[][] getTable() {
         return this.table;
@@ -29,13 +29,20 @@ public class GameControl {
         for (int i = 0; i < 10; i++){
             int[] shipCoords = new int[2];
 
+            boolean computerShipAlreadyInTheseCoords = this.table[shipCoords[0]][shipCoords[1]] == "C";
+            boolean playerShipAlreadyInTheseCoords = this.table[shipCoords[0]][shipCoords[1]] == "\uD83D\uDEA2";
+
             do{
                 shipCoords[0] = (int) (Math.random() * 10);
                 shipCoords[1] = (int) (Math.random() * 10);
             }
-            while (this.table[shipCoords[0]][shipCoords[1]] == "C");
+            while (computerShipAlreadyInTheseCoords);
 
-            this.table[shipCoords[0]][shipCoords[1]] = "C";
+            if (playerShipAlreadyInTheseCoords){
+                this.table[shipCoords[0]][shipCoords[1]] = "2";
+            }else {
+                this.table[shipCoords[0]][shipCoords[1]] = "C";
+            }
         }
     }
 
@@ -43,12 +50,11 @@ public class GameControl {
         int[][] convertedCoords = new int[10][2];
 
         for(int i = 0; i < shipsCoords.length; i++){
-            int coordsY = Integer.parseInt(Character.toString(shipsCoords[i].charAt(1)));
 
             char shipsCoordsFirstChar = shipsCoords[i].toUpperCase().charAt(0);
             convertedCoords[i][0] = this.switchLetterToCorrespondentInt(shipsCoordsFirstChar);
 
-            convertedCoords[i][1] = coordsY;
+            convertedCoords[i][1] = Integer.parseInt(Character.toString(shipsCoords[i].charAt(1)));
         }
         return convertedCoords;
     }
