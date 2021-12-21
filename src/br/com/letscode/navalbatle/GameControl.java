@@ -10,6 +10,7 @@ public class GameControl {
     private final String[][] table = new String[10][10];
     private int numberOfPlayerShips = 0;
     private int numberOfComputerShips = 0;
+    private String armyName;
 
     public String[][] getTable() {
         return this.table;
@@ -19,6 +20,13 @@ public class GameControl {
     }
     public int getNumberOfComputerShips() {
         return numberOfComputerShips;
+    }
+    public String getArmyName() {
+        return armyName;
+    }
+
+    public void setArmyName(String armyName) {
+        this.armyName = armyName;
     }
 
     private final Random rand = new Random();
@@ -35,7 +43,7 @@ public class GameControl {
     }
 
     private int[] checkCoordsValidity(String coords) throws InvalidCoordsException{
-        if (coords.length() > 2) throw new InvalidCoordsException("Coordenadas inválidas");
+        if (coords.length() != 2) throw new InvalidCoordsException("Coordenadas inválidas");
 
         int coordsX = this.switchLetterToCorrespondentInt(coords.toUpperCase().charAt(0));
         if (coordsX == 10) throw new InvalidCoordsException("Coordenada X inválida");
@@ -44,6 +52,8 @@ public class GameControl {
             coordsY = Integer.parseInt(Character.toString(coords.charAt(1)));
         }catch (NumberFormatException err){
             throw new InvalidCoordsException("Coordenada Y inválida");
+        }catch (StringIndexOutOfBoundsException err){
+            throw new InvalidCoordsException("Coordenadas inválidas");
         }
 
         return new int[]{coordsX, coordsY};
@@ -83,7 +93,7 @@ public class GameControl {
 
         computerPlay();
 
-        return false;
+        return rand.nextBoolean();
     }
 
     private void computerPlay(){
