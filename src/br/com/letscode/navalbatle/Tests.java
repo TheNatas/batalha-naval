@@ -33,14 +33,22 @@ public class Tests {
             System.out.println("Posicionando navios do adversário");
             ctrl.placeComputerShips();
 
-            do{
-                try{
-                    System.out.print("Onde você deseja atacar?");
-                    table = ctrl.play(in.next());
-                }catch (InvalidCoordsException err){
-                    System.out.println(err.message);
-                }
-            }while (true);
+            boolean finished = false;
+            while(!finished){
+                printTable(table);
+                System.out.printf("Number of player ships: %d%n", ctrl.getNumberOfPlayerShips());
+                System.out.printf("Number of computer ships: %d%n", ctrl.getNumberOfComputerShips());
+
+                do {
+                    try {
+                        System.out.print("Onde você deseja atacar?");
+                        finished = ctrl.play(in.next());
+                        break;
+                    } catch (InvalidCoordsException err) {
+                        System.out.println(err.message);
+                    }
+                }while (true);
+            }
 
         }
 

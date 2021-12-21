@@ -2,58 +2,52 @@ package br.com.letscode.navalbatle;
 
 import br.com.letscode.navalbatle.exceptions.InvalidCoordsException;
 
-import java.util.InputMismatchException;
 import java.util.Objects;
 import java.util.Random;
 
 public class GameControl {
 
     private final String[][] table = new String[10][10];
+    private int numberOfPlayerShips = 0;
+    private int numberOfComputerShips = 0;
 
     public String[][] getTable() {
         return this.table;
+    }
+    public int getNumberOfPlayerShips() {
+        return numberOfPlayerShips;
+    }
+    public int getNumberOfComputerShips() {
+        return numberOfComputerShips;
     }
 
     private final Random rand = new Random();
 
     public String[][] placeShip(String coords) throws InvalidCoordsException{
-        if (coords.length() > 2) throw new InvalidCoordsException("Coordenadas inválidas");
+        int[] checkedCoords = this.checkCoordsValidity(coords);
 
-        int coordsX = this.switchLetterToCorrespondentInt(coords.toUpperCase().charAt(0));
-        if (coordsX == 10) throw new InvalidCoordsException("Coordenada X inválida");
+        if (this.table[checkedCoords[0]][checkedCoords[1]] == "N") throw new InvalidCoordsException("Você já tem um navio nessas coordenadas");
 
-        try{
-            int coordsY = Integer.parseInt(Character.toString(coords.charAt(1)));
-            if (this.table[coordsX][coordsY] == "N") throw new InvalidCoordsException("Você já tem um navio nessas coordenadas");
-
-            this.table[coordsX][coordsY] = "N";
-        }catch (NumberFormatException err){
-            throw new InvalidCoordsException("Coordenada Y inválida");
-        }
+        this.table[checkedCoords[0]][checkedCoords[1]] = "N";
+        this.numberOfPlayerShips++;
 
         return this.table;
     }
 
-//    public String[][] placeShips(String[] unconvertedCoords) throws InvalidCoordsException{
-//        int[][] allShipsCoords = convertCoords(unconvertedCoords);
-//
-//        this.placePlayerShips(allShipsCoords);
-//        this.placeComputerShips();
-//
-//        return this.table;
-//    }
-//
-//    private void placePlayerShips(int[][] allShipsCoords){
-//
-//        for (int i = 0; i < allShipsCoords.length; i++){
-//            try {
-//                this.table[allShipsCoords[i][0]][allShipsCoords[i][1]] = "N";
-//            }catch (InputMismatchException err){
-//                throw new InvalidCoordsException();
-//            }
-//        }
-//
-//    }
+    private int[] checkCoordsValidity(String coords) throws InvalidCoordsException{
+        if (coords.length() > 2) throw new InvalidCoordsException("Coordenadas inválidas");
+
+        int coordsX = this.switchLetterToCorrespondentInt(coords.toUpperCase().charAt(0));
+        if (coordsX == 10) throw new InvalidCoordsException("Coordenada X inválida");
+        int coordsY;
+        try{
+            coordsY = Integer.parseInt(Character.toString(coords.charAt(1)));
+        }catch (NumberFormatException err){
+            throw new InvalidCoordsException("Coordenada Y inválida");
+        }
+
+        return new int[]{coordsX, coordsY};
+    }
 
     public void placeComputerShips(){
         for (int i = 0; i < 10; i++){
@@ -75,31 +69,21 @@ public class GameControl {
             }else {
                 this.table[shipCoords[0]][shipCoords[1]] = "C";
             }
+
+            this.numberOfComputerShips++;
         }
     }
 
-    private int[][] convertCoords(String[] shipsCoords) {
-        int[][] convertedCoords = new int[10][2];
+    public boolean play(String shipCoords) throws InvalidCoordsException{
+        int[] checkedCoords = this.checkCoordsValidity(shipCoords);
 
-        for(int i = 0; i < shipsCoords.length; i++){
+        if (this.table[checkedCoords[0]][checkedCoords[1]] == "-") throw new InvalidCoordsException("Você já atacou aqui");
 
-            char shipsCoordsFirstChar = shipsCoords[i].toUpperCase().charAt(0);
-            convertedCoords[i][0] = this.switchLetterToCorrespondentInt(shipsCoordsFirstChar);
-
-            convertedCoords[i][1] = Integer.parseInt(Character.toString(shipsCoords[i].charAt(1)));
-        }
-        return convertedCoords;
-    }
-
-    public String[][] play(String shipCoords){
-        int coordsX = this.switchLetterToCorrespondentInt(shipCoords.charAt(0));
-        int coordsY = Integer.parseInt(Character.toString(shipCoords.charAt(1)));
-
-        // playMethod(coordsX, coordsY);
+        // playMethod(checkedCoords);
 
         computerPlay();
 
-        return this.table;
+        return false;
     }
 
     private void computerPlay(){
