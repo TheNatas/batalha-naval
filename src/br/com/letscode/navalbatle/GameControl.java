@@ -1,42 +1,74 @@
 package br.com.letscode.navalbatle;
 
+import br.com.letscode.navalbatle.exceptions.InvalidCoordsException;
+
+import java.util.InputMismatchException;
+import java.util.Objects;
+import java.util.Random;
+
 public class GameControl {
 
-    private static String[][] table = new String[10][10];
+    private final String[][] table = new String[10][10];
 
     public String[][] getTable() {
         return this.table;
     }
 
-    public String[][] placeShips(String[] unconvertedCoords){
-        int[][] allShipsCoords = convertCoords(unconvertedCoords);
+    private final Random rand = new Random();
 
-        this.placePlayerShips(allShipsCoords);
-        this.placeComputerShips();
+    public String[][] placeShip(String coords) throws InvalidCoordsException{
+        if (coords.length() > 2) throw new InvalidCoordsException("Coordenadas inválidas");
+
+        int coordsX = this.switchLetterToCorrespondentInt(coords.toUpperCase().charAt(0));
+        if (coordsX == 10) throw new InvalidCoordsException("Coordenada X inválida");
+
+        try{
+            int coordsY = Integer.parseInt(Character.toString(coords.charAt(1)));
+            if (this.table[coordsX][coordsY] == "N") throw new InvalidCoordsException("Você já tem um navio nessas coordenadas");
+
+            this.table[coordsX][coordsY] = "N";
+        }catch (NumberFormatException err){
+            throw new InvalidCoordsException("Coordenada Y inválida");
+        }
 
         return this.table;
     }
 
-    private void placePlayerShips(int[][] allShipsCoords){
+//    public String[][] placeShips(String[] unconvertedCoords) throws InvalidCoordsException{
+//        int[][] allShipsCoords = convertCoords(unconvertedCoords);
+//
+//        this.placePlayerShips(allShipsCoords);
+//        this.placeComputerShips();
+//
+//        return this.table;
+//    }
+//
+//    private void placePlayerShips(int[][] allShipsCoords){
+//
+//        for (int i = 0; i < allShipsCoords.length; i++){
+//            try {
+//                this.table[allShipsCoords[i][0]][allShipsCoords[i][1]] = "N";
+//            }catch (InputMismatchException err){
+//                throw new InvalidCoordsException();
+//            }
+//        }
+//
+//    }
 
-        for (int[] shipCoords : allShipsCoords){
-            table[shipCoords[0]][shipCoords[1]] = "\uD83D\uDEA2";
-        }
-
-    }
-
-    private void placeComputerShips(){
+    public void placeComputerShips(){
         for (int i = 0; i < 10; i++){
             int[] shipCoords = new int[2];
 
-            boolean computerShipAlreadyInTheseCoords = this.table[shipCoords[0]][shipCoords[1]] == "C";
-            boolean playerShipAlreadyInTheseCoords = this.table[shipCoords[0]][shipCoords[1]] == "\uD83D\uDEA2";
+            boolean computerShipAlreadyInTheseCoords;
 
             do{
-                shipCoords[0] = (int) (Math.random() * 10);
-                shipCoords[1] = (int) (Math.random() * 10);
+                shipCoords[0] = rand.nextInt(10);
+                shipCoords[1] = rand.nextInt(10);
+                computerShipAlreadyInTheseCoords = Objects.equals(this.table[shipCoords[0]][shipCoords[1]], "C");
             }
             while (computerShipAlreadyInTheseCoords);
+
+            boolean playerShipAlreadyInTheseCoords = Objects.equals(this.table[shipCoords[0]][shipCoords[1]], "N");
 
             if (playerShipAlreadyInTheseCoords){
                 this.table[shipCoords[0]][shipCoords[1]] = "2";
@@ -59,11 +91,26 @@ public class GameControl {
         return convertedCoords;
     }
 
-    public void play(String shipCoords){
+    public String[][] play(String shipCoords){
         int coordsX = this.switchLetterToCorrespondentInt(shipCoords.charAt(0));
         int coordsY = Integer.parseInt(Character.toString(shipCoords.charAt(1)));
 
-        // return new Play(new int[]{coordsX , coordsY});
+        // playMethod(coordsX, coordsY);
+
+        computerPlay();
+
+        return this.table;
+    }
+
+    private void computerPlay(){
+        int coordsX;
+        int coordsY;
+        do{
+            coordsX = rand.nextInt(10);
+            coordsY = rand.nextInt(10);
+        }while (Objects.equals(this.table[coordsX][coordsY], "_"));
+
+        // computerPlayMethod(coordsX, coordsY);
     }
 
     private int switchLetterToCorrespondentInt(char letter){

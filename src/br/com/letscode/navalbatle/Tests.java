@@ -1,16 +1,48 @@
 package br.com.letscode.navalbatle;
 
+import br.com.letscode.navalbatle.exceptions.InvalidCoordsException;
+
+import java.util.Objects;
+import java.util.Scanner;
+
 public class Tests {
 
     public static void main(String[] args) {
 
         GameControl ctrl = new GameControl();
 
-        printTable(ctrl.getTable());
+        String[][] table = ctrl.getTable();
+        printTable(table);
 
         // test
-        String[][] table = ctrl.placeShips(new String[]{"A2", "C5", "F6", "B2", "J1", "H6", "C3", "D0", "E9", "A5"});
-        printTable(table);
+        try(Scanner in = new Scanner(System.in)){
+
+            for (int i = 0; i < 10; i++){
+                do {
+                    try {
+                        System.out.printf("Posicione seu %d° navio: ", i + 1);
+                        table = ctrl.placeShip(in.next());
+                        printTable(table);
+                        break;
+                    } catch (InvalidCoordsException err) {
+                        System.out.println(err.message);
+                    }
+                }while (true);
+            }
+
+            System.out.println("Posicionando navios do adversário");
+            ctrl.placeComputerShips();
+
+            do{
+                try{
+                    System.out.print("Onde você deseja atacar?");
+                    table = ctrl.play(in.next());
+                }catch (InvalidCoordsException err){
+                    System.out.println(err.message);
+                }
+            }while (true);
+
+        }
 
     }
 
@@ -23,10 +55,25 @@ public class Tests {
         for (int i = 0; i < table.length; i++){
             System.out.printf("| %s |", switchIntToCorrespondentLetter(i));
             for (String cell : table[i]){
-                System.out.printf(" %s |", cell);
+
+                String printable = hideGameControls(cell);
+
+                System.out.printf(" %s |", printable);
             }
             System.out.println("");
         }
+    }
+
+    private static String hideGameControls(String cell) {
+        String printable;
+        if (cell == "C" || cell == "_" || Objects.isNull(cell)){
+            printable = " ";
+        }else if (cell == "2"){
+            printable = "N";
+        }else{
+            printable = cell;
+        }
+        return printable;
     }
 
     private static String switchIntToCorrespondentLetter(int i){
