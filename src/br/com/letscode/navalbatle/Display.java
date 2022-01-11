@@ -103,7 +103,7 @@ public class Display {
 
     private static String hideGameControls(String cell) {
         String printable;
-        if (cell == "C" || cell == "_"){
+        if (cell == "C" || cell == "_" || cell == "c" || cell == "#" || cell == "Z"){
             printable = "~";
         }else if (cell == "2"){
             printable = "N";

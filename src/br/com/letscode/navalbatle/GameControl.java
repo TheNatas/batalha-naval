@@ -99,16 +99,19 @@ public class GameControl {
 
         computerPlay();
 
-        return rand.nextBoolean();
+        return rand.nextBoolean(); // TODO: Deve retornar true quando o jogo estiver terminado e false para o contrário
     }
 
     private void computerPlay(){
+        boolean alreadyAttackedHere;
+
         int coordsX;
         int coordsY;
         do{
             coordsX = rand.nextInt(10);
             coordsY = rand.nextInt(10);
-        }while (Objects.equals(this.table[coordsX][coordsY], "_"));
+            alreadyAttackedHere = Objects.equals(this.table[coordsX][coordsY], "_") || Objects.equals(this.table[coordsX][coordsY], "#") || Objects.equals(this.table[coordsX][coordsY], "c") || Objects.equals(this.table[coordsX][coordsY], "Z");
+        }while (alreadyAttackedHere);
 
         // computerPlayMethod(coordsX, coordsY);
     }

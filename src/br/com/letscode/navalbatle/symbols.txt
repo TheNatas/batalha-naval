@@ -6,4 +6,7 @@ n Ataque falho do jogador com navio posicionado [VISÍVEL]
 X Ataque certeiro do jogador com navio posicionado [VISÍVEL]
 C Navio do computador
 2 Navio do jogador e do computador
-_ Ataque do computador
+_ Ataque falho do computador
+# Ataque certeiro do computador
+c Ataque falho do computador com navio posicionado
+Z Ataque certeiro do computador com navio posicionado
