@@ -11,6 +11,7 @@ public class GameControl {
     private int numberOfPlayerShips = 0;
     private int numberOfComputerShips = 0;
     private String armyName;
+    private String winner;
 
     public String[][] getTable() {
         return this.table;
@@ -23,6 +24,9 @@ public class GameControl {
     }
     public String getArmyName() {
         return armyName;
+    }
+    public String getWinner() {
+        return winner;
     }
 
     public void setArmyName(String armyName) {
@@ -87,9 +91,11 @@ public class GameControl {
     public boolean play(String shipCoords) throws InvalidCoordsException{
         int[] checkedCoords = this.checkCoordsValidity(shipCoords);
 
-        if (this.table[checkedCoords[0]][checkedCoords[1]] == "-") throw new InvalidCoordsException("Você já atacou aqui");
+        if (this.table[checkedCoords[0]][checkedCoords[1]] == "-" || this.table[checkedCoords[0]][checkedCoords[1]] == "*"){
+            throw new InvalidCoordsException("Você já atacou aqui");
+        }
 
-        // playMethod(checkedCoords);
+        // this.winner = playMethod(checkedCoords);
 
         computerPlay();
 
