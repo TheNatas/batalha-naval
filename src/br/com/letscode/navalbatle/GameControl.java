@@ -7,9 +7,10 @@ import java.util.Random;
 
 public class GameControl {
 
-    private final String[][] table = new String[10][10];
-    private int numberOfPlayerShips = 0;
-    private int numberOfComputerShips = 0;
+    protected static String[][] table = new String[10][10];
+    protected static int numberOfPlayerShips = 0;
+    protected static int numberOfComputerShips = 0;
+    public Play[] computerAttacks = new Play[99];
     private String armyName;
     private String winner;
 
@@ -38,12 +39,36 @@ public class GameControl {
     public String[][] placeShip(String coords) throws InvalidCoordsException{
         int[] checkedCoords = this.checkCoordsValidity(coords);
 
-        if (this.table[checkedCoords[0]][checkedCoords[1]] == "N") throw new InvalidCoordsException("Você já tem um navio nessas coordenadas");
+        if (table[checkedCoords[0]][checkedCoords[1]] == "N") throw new InvalidCoordsException("Você já tem um navio nessas coordenadas");
 
-        this.table[checkedCoords[0]][checkedCoords[1]] = "N";
-        this.numberOfPlayerShips++;
+        table[checkedCoords[0]][checkedCoords[1]] = "N";
+        numberOfPlayerShips++;
 
-        return this.table;
+        return table;
+    }
+
+    public String[][] autoPlaceShip(){
+        int[] coords = generateFreeCoords("N");
+        table[coords[0]][coords[1]] = "N";
+        numberOfPlayerShips++;
+
+        return table;
+    }
+
+    private int[] generateFreeCoords(String coordsContentToAvoid){
+        int shipCoordsX;
+        int shipCoordsY;
+
+        boolean shipAlreadyInTheseCoords;
+
+        do{
+            shipCoordsX = rand.nextInt(10);
+            shipCoordsY = rand.nextInt(10);
+            shipAlreadyInTheseCoords = Objects.equals(this.table[shipCoordsX][shipCoordsY], coordsContentToAvoid);
+        }
+        while (shipAlreadyInTheseCoords);
+
+        return new int[]{shipCoordsX, shipCoordsY};
     }
 
     private int[] checkCoordsValidity(String coords) throws InvalidCoordsException{
@@ -65,16 +90,7 @@ public class GameControl {
 
     public void placeComputerShips(){
         for (int i = 0; i < 10; i++){
-            int[] shipCoords = new int[2];
-
-            boolean computerShipAlreadyInTheseCoords;
-
-            do{
-                shipCoords[0] = rand.nextInt(10);
-                shipCoords[1] = rand.nextInt(10);
-                computerShipAlreadyInTheseCoords = Objects.equals(this.table[shipCoords[0]][shipCoords[1]], "C");
-            }
-            while (computerShipAlreadyInTheseCoords);
+            int[] shipCoords = generateFreeCoords("C");
 
             boolean playerShipAlreadyInTheseCoords = Objects.equals(this.table[shipCoords[0]][shipCoords[1]], "N");
 
@@ -90,30 +106,51 @@ public class GameControl {
 
     public boolean play(String shipCoords) throws InvalidCoordsException{
         int[] checkedCoords = this.checkCoordsValidity(shipCoords);
+        boolean alreadyAttackedHere = this.table[checkedCoords[0]][checkedCoords[1]] == "-" || this.table[checkedCoords[0]][checkedCoords[1]] == "*" || this.table[checkedCoords[0]][checkedCoords[1]] == "n" || this.table[checkedCoords[0]][checkedCoords[1]] == "X";
 
-        if (this.table[checkedCoords[0]][checkedCoords[1]] == "-" || this.table[checkedCoords[0]][checkedCoords[1]] == "*"){
+        if (alreadyAttackedHere){
             throw new InvalidCoordsException("Você já atacou aqui");
         }
 
-        // this.winner = playMethod(checkedCoords);
+        new Play(checkedCoords[0], checkedCoords[1], "C");
 
-        computerPlay();
+        if (this.numberOfComputerShips == 0) {
+            this.winner = this.armyName;
+            return true;
+        }
 
-        return rand.nextBoolean(); // TODO: Deve retornar true quando o jogo estiver terminado e false para o contrário
+        return computerPlay();
     }
 
-    private void computerPlay(){
-        boolean alreadyAttackedHere;
+    private boolean computerPlay(){
+        boolean alreadyAttackedHere = false;
 
         int coordsX;
         int coordsY;
         do{
             coordsX = rand.nextInt(10);
             coordsY = rand.nextInt(10);
-            alreadyAttackedHere = Objects.equals(this.table[coordsX][coordsY], "_") || Objects.equals(this.table[coordsX][coordsY], "#") || Objects.equals(this.table[coordsX][coordsY], "c") || Objects.equals(this.table[coordsX][coordsY], "Z");
+
+            for (Play play : computerAttacks){
+                if (Objects.isNull(play))
+                    break;
+                alreadyAttackedHere = play.coordsX == coordsX && play.coordsY == coordsY;
+            }
         }while (alreadyAttackedHere);
 
-        // computerPlayMethod(coordsX, coordsY);
+        for (int i = 0; true; i++){
+            if (Objects.isNull(computerAttacks[i])) {
+                computerAttacks[i] = new Play(coordsX, coordsY, "N");
+                break;
+            }
+        }
+
+        if (this.numberOfPlayerShips == 0) {
+            this.winner = "computer";
+            return true;
+        }
+
+        return false;
     }
 
     private int switchLetterToCorrespondentInt(char letter){

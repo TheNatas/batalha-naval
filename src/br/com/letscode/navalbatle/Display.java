@@ -24,32 +24,45 @@ public class Display {
 
             printTable(table, false);
 
-            for (int i = 0; i < 10; i++){
-                do {
-                    try {
-                        System.out.printf("Posicione seu %d° navio: ", i + 1);
-                        table = ctrl.placeShip(in.next());
-                        printTable(table, false);
-                        break;
-                    } catch (InvalidCoordsException err) {
-                        System.out.println(err.message);
-                    }
-                }while (true);
+            String ans;
+            do{
+                System.out.print("# Deseja posicionar seus navios automaticamente? (S/N) ");
+                ans = in.next().toUpperCase();
+            }while (ans.equals("S") && ans.equals("N"));
+
+            if (ans.equals("S")){
+                for (int i = 0; i < 10; i++){
+                    table = ctrl.autoPlaceShip();
+                }
+            }
+            else{
+                for (int i = 0; i < 10; i++) {
+                    do {
+                        try {
+                            System.out.printf("# Posicione seu %d° navio: ", i + 1);
+                            table = ctrl.placeShip(in.next());
+                            printTable(table, false);
+                            break;
+                        } catch (InvalidCoordsException err) {
+                            System.out.println(err.message);
+                        }
+                    } while (true);
+                }
             }
 
-            System.out.println("Posicionando navios do adversário");
+            System.out.println("Posicionando navios do adversário...");
             ctrl.placeComputerShips();
 
             boolean finished = false;
             while(!finished){
                 printTable(table, false);
                 System.out.printf("%s: %d%n", ctrl.getArmyName(), ctrl.getNumberOfPlayerShips());
-                System.out.printf("Number of computer ships: %d%n", ctrl.getNumberOfComputerShips());
+                System.out.printf("Tropa inimiga: %d%n", ctrl.getNumberOfComputerShips());
 
                 do {
                     try {
                         System.out.println("");
-                        System.out.print("Onde você deseja atacar? ");
+                        System.out.print("# Onde você deseja atacar? ");
                         finished = ctrl.play(in.next());
                         break;
                     } catch (InvalidCoordsException err) {
@@ -70,18 +83,24 @@ public class Display {
 
         for (int i = 0; i < table.length; i++){
             System.out.printf("| %s |", switchIntToCorrespondentLetter(i));
-            for (String cell : table[i]){
+            for (int j = 0; j < table[i].length; j++){
 
                 String printable;
-                if (Objects.isNull(cell))
-                    printable = "~";
+                if (Objects.isNull(table[i][j]))
+                    printable = " ";
                 else
-                    printable = gameEnded ? cell : hideGameControls(cell);
+                    printable = gameEnded ? showAllShips(table[i][j], i, j) : hideGameControls(table[i][j]);
 
                 System.out.printf(" %s |", printable);
             }
             System.out.println("");
         }
+
+//        System.out.println("Ataques do computador: ");
+//        for (Play play : ctrl.computerAttacks){
+//            if (Objects.isNull(play)) break;
+//            System.out.printf("%d%d - %b%n", play.coordsX, play.coordsY, play.computerRightShot);
+//        }
     }
 
     private static void printTableHeader(boolean gameEnded) {
@@ -102,15 +121,35 @@ public class Display {
     }
 
     private static String hideGameControls(String cell) {
-        String printable;
-        if (cell == "C" || cell == "_" || cell == "c" || cell == "#" || cell == "Z"){
-            printable = "~";
+        if (cell == "C"){
+            return " ";
         }else if (cell == "2"){
-            printable = "N";
+            return "N";
         }else{
-            printable = cell;
+            return cell;
         }
-        return printable;
+    }
+
+    private static String showAllShips(String cell, int coordsX, int coordsY){
+        for (Play play : ctrl.computerAttacks){ // mapear os ataques certos do computador para recolocar os navios lá
+            if (Objects.isNull(play)) break;
+            if (play.coordsX == coordsX && play.coordsY == coordsY) {
+
+                if (play.computerRightShot == true) {
+                    return "N";
+                }
+            }
+        }
+
+        if (cell == "*"){
+            return "C";
+        }else if (cell == "X"){
+            return "2";
+        }else if (cell == "n"){
+            return "N";
+        }else{
+            return cell;
+        }
     }
 
     private static String switchIntToCorrespondentLetter(int i){

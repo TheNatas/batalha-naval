@@ -83,7 +83,7 @@
 //    private static String hideGameControls(String cell) {
 //        String printable;
 //        if (cell == "C" || cell == "_" || Objects.isNull(cell)){
-//            printable = "~";
+//            printable = " ";
 //        }else if (cell == "2"){
 //            printable = "N";
 //        }else{
