@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 public class Display {
 
-    private static final GameControl ctrl = new GameControl();
+    private static final Table ctrl = new Table();
 
     public static void main(String[] args) {
 
@@ -15,7 +15,7 @@ public class Display {
         System.out.println("         BEM-VINDO À BATALHA NAVAL!");
         System.out.println("---------------------------------------------");
 
-        String[][] table = ctrl.getTable();
+        TableCells[][] table = ctrl.getTable();
 
         try(Scanner in = new Scanner(System.in)){
 
@@ -28,7 +28,7 @@ public class Display {
             do{
                 System.out.print("# Deseja posicionar seus navios automaticamente? (S/N) ");
                 ans = in.next().toUpperCase();
-            }while (ans.equals("S") && ans.equals("N"));
+            }while (!ans.equals("S") && !ans.equals("N"));
 
             if (ans.equals("S")){
                 for (int i = 0; i < 10; i++){
@@ -77,7 +77,7 @@ public class Display {
 
     }
 
-    private static void printTable(String[][] table, boolean gameEnded){
+    private static void printTable(TableCells[][] table, boolean gameEnded){
         printTableHeader(gameEnded);
         System.out.println("|   | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |");
 
@@ -85,9 +85,9 @@ public class Display {
             System.out.printf("| %s |", switchIntToCorrespondentLetter(i));
             for (int j = 0; j < table[i].length; j++){
 
-                String printable;
+                TableCells printable;
                 if (Objects.isNull(table[i][j]))
-                    printable = " ";
+                    printable = TableCells.WATER;
                 else
                     printable = gameEnded ? showAllShips(table[i][j], i, j) : hideGameControls(table[i][j]);
 
@@ -120,33 +120,33 @@ public class Display {
         System.out.println("---------------------------------------------");
     }
 
-    private static String hideGameControls(String cell) {
-        if (cell == "C"){
-            return " ";
-        }else if (cell == "2"){
-            return "N";
+    private static TableCells hideGameControls(TableCells cell) {
+        if (cell == TableCells.COMPUTER_SHIP){
+            return TableCells.WATER;
+        }else if (cell == TableCells.BOTH_SHIPS){
+            return TableCells.PLAYER_SHIP;
         }else{
             return cell;
         }
     }
 
-    private static String showAllShips(String cell, int coordsX, int coordsY){
+    private static TableCells showAllShips(TableCells cell, int coordsX, int coordsY){
         for (Play play : ctrl.computerAttacks){ // mapear os ataques certos do computador para recolocar os navios lá
             if (Objects.isNull(play)) break;
             if (play.coordsX == coordsX && play.coordsY == coordsY) {
 
                 if (play.computerRightShot == true) {
-                    return "N";
+                    return TableCells.PLAYER_SHIP;
                 }
             }
         }
 
-        if (cell == "*"){
-            return "C";
-        }else if (cell == "X"){
-            return "2";
-        }else if (cell == "n"){
-            return "N";
+        if (cell == TableCells.CRITICAL_ATTACK){
+            return TableCells.COMPUTER_SHIP;
+        }else if (cell == TableCells.SHIP_AND_CRITICAL_ATTACK){
+            return TableCells.BOTH_SHIPS;
+        }else if (cell == TableCells.SHIP_AND_MISSED_ATTACK){
+            return TableCells.PLAYER_SHIP;
         }else{
             return cell;
         }

@@ -5,16 +5,16 @@ import br.com.letscode.navalbatle.exceptions.InvalidCoordsException;
 import java.util.Objects;
 import java.util.Random;
 
-public class GameControl {
+public class Table {
 
-    protected static String[][] table = new String[10][10];
+    protected static TableCells[][] table = new TableCells[10][10];
     protected static int numberOfPlayerShips = 0;
     protected static int numberOfComputerShips = 0;
-    public Play[] computerAttacks = new Play[99];
+    public Play[] computerAttacks = new Play[100];
     private String armyName;
     private String winner;
 
-    public String[][] getTable() {
+    public TableCells[][] getTable() {
         return this.table;
     }
     public int getNumberOfPlayerShips() {
@@ -36,26 +36,26 @@ public class GameControl {
 
     private final Random rand = new Random();
 
-    public String[][] placeShip(String coords) throws InvalidCoordsException{
+    public TableCells[][] placeShip(String coords) throws InvalidCoordsException{
         int[] checkedCoords = this.checkCoordsValidity(coords);
 
-        if (table[checkedCoords[0]][checkedCoords[1]] == "N") throw new InvalidCoordsException("Você já tem um navio nessas coordenadas");
+        if (table[checkedCoords[0]][checkedCoords[1]] == TableCells.PLAYER_SHIP) throw new InvalidCoordsException("Você já tem um navio nessas coordenadas");
 
-        table[checkedCoords[0]][checkedCoords[1]] = "N";
+        table[checkedCoords[0]][checkedCoords[1]] = TableCells.PLAYER_SHIP;
         numberOfPlayerShips++;
 
         return table;
     }
 
-    public String[][] autoPlaceShip(){
-        int[] coords = generateFreeCoords("N");
-        table[coords[0]][coords[1]] = "N";
+    public TableCells[][] autoPlaceShip(){
+        int[] coords = generateFreeCoords(TableCells.PLAYER_SHIP);
+        table[coords[0]][coords[1]] = TableCells.PLAYER_SHIP;
         numberOfPlayerShips++;
 
         return table;
     }
 
-    private int[] generateFreeCoords(String coordsContentToAvoid){
+    private int[] generateFreeCoords(TableCells coordsContentToAvoid){
         int shipCoordsX;
         int shipCoordsY;
 
@@ -90,14 +90,14 @@ public class GameControl {
 
     public void placeComputerShips(){
         for (int i = 0; i < 10; i++){
-            int[] shipCoords = generateFreeCoords("C");
+            int[] shipCoords = generateFreeCoords(TableCells.COMPUTER_SHIP);
 
-            boolean playerShipAlreadyInTheseCoords = Objects.equals(this.table[shipCoords[0]][shipCoords[1]], "N");
+            boolean playerShipAlreadyInTheseCoords = Objects.equals(this.table[shipCoords[0]][shipCoords[1]], TableCells.PLAYER_SHIP);
 
             if (playerShipAlreadyInTheseCoords){
-                this.table[shipCoords[0]][shipCoords[1]] = "2";
+                this.table[shipCoords[0]][shipCoords[1]] = TableCells.BOTH_SHIPS;
             }else {
-                this.table[shipCoords[0]][shipCoords[1]] = "C";
+                this.table[shipCoords[0]][shipCoords[1]] = TableCells.COMPUTER_SHIP;
             }
 
             this.numberOfComputerShips++;
@@ -106,13 +106,13 @@ public class GameControl {
 
     public boolean play(String shipCoords) throws InvalidCoordsException{
         int[] checkedCoords = this.checkCoordsValidity(shipCoords);
-        boolean alreadyAttackedHere = this.table[checkedCoords[0]][checkedCoords[1]] == "-" || this.table[checkedCoords[0]][checkedCoords[1]] == "*" || this.table[checkedCoords[0]][checkedCoords[1]] == "n" || this.table[checkedCoords[0]][checkedCoords[1]] == "X";
+        boolean alreadyAttackedHere = this.table[checkedCoords[0]][checkedCoords[1]] == TableCells.MISSED_ATTACK || this.table[checkedCoords[0]][checkedCoords[1]] == TableCells.CRITICAL_ATTACK || this.table[checkedCoords[0]][checkedCoords[1]] == TableCells.SHIP_AND_MISSED_ATTACK || this.table[checkedCoords[0]][checkedCoords[1]] == TableCells.SHIP_AND_CRITICAL_ATTACK;
 
         if (alreadyAttackedHere){
             throw new InvalidCoordsException("Você já atacou aqui");
         }
 
-        new Play(checkedCoords[0], checkedCoords[1], "C");
+        new Play(checkedCoords[0], checkedCoords[1], TableCells.COMPUTER_SHIP);
 
         if (this.numberOfComputerShips == 0) {
             this.winner = this.armyName;
@@ -140,7 +140,7 @@ public class GameControl {
 
         for (int i = 0; true; i++){
             if (Objects.isNull(computerAttacks[i])) {
-                computerAttacks[i] = new Play(coordsX, coordsY, "N");
+                computerAttacks[i] = new Play(coordsX, coordsY, TableCells.PLAYER_SHIP);
                 break;
             }
         }

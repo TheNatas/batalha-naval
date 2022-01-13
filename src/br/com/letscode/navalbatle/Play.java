@@ -1,45 +1,45 @@
 package br.com.letscode.navalbatle;
 
-public class Play extends GameControl{
+public class Play extends Table {
 
     public int coordsX;
     public int coordsY;
     public boolean computerRightShot = false;
 
-    public Play(int coordsX, int coordsY, String target){
+    public Play(int coordsX, int coordsY, TableCells target){
         this.coordsX = coordsX;
         this.coordsY = coordsY;
 
-        if (target == "C")
+        if (target == TableCells.COMPUTER_SHIP)
             playerPlay(coordsX, coordsY);
         else
             computerPlay(coordsX, coordsY);
     }
 
     private void playerPlay(int coordsX, int coordsY){
-        String coordsContent = getTable()[coordsX][coordsY];
+        TableCells coordsContent = getTable()[coordsX][coordsY];
 
-        if (coordsContent == "C"){
-            table[coordsX][coordsY] = "*";
+        if (coordsContent == TableCells.COMPUTER_SHIP){
+            table[coordsX][coordsY] = TableCells.CRITICAL_ATTACK;
             numberOfComputerShips--;
-        }else if (coordsContent == "2"){
-            table[coordsX][coordsY] = "X";
+        }else if (coordsContent == TableCells.BOTH_SHIPS){
+            table[coordsX][coordsY] = TableCells.SHIP_AND_CRITICAL_ATTACK;
             numberOfComputerShips--;
-        }else if (coordsContent == "N"){
-            table[coordsX][coordsY] = "n";
+        }else if (coordsContent == TableCells.PLAYER_SHIP){
+            table[coordsX][coordsY] = TableCells.SHIP_AND_MISSED_ATTACK;
         }else{
-            table[coordsX][coordsY] = "-";
+            table[coordsX][coordsY] = TableCells.MISSED_ATTACK;
         }
     }
 
     private void computerPlay(int coordsX, int coordsY){
-        String coordsContent = getTable()[coordsX][coordsY];
-        if (coordsContent == "N"){
-            table[coordsX][coordsY] = " ";
+        TableCells coordsContent = getTable()[coordsX][coordsY];
+        if (coordsContent == TableCells.PLAYER_SHIP){
+            table[coordsX][coordsY] = TableCells.WATER;
             numberOfPlayerShips--;
             this.computerRightShot = true;
-        }else if (coordsContent == "2"){
-            table[coordsX][coordsY] = "C";
+        }else if (coordsContent == TableCells.BOTH_SHIPS){
+            table[coordsX][coordsY] = TableCells.COMPUTER_SHIP;
             numberOfPlayerShips--;
             this.computerRightShot = true;
         }
