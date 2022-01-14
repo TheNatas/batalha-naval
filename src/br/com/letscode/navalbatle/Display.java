@@ -1,8 +1,10 @@
 package br.com.letscode.navalbatle;
 
 import br.com.letscode.navalbatle.exceptions.InvalidCoordsException;
+import br.com.letscode.navalbatle.helpers.AutoGenerator;
 
 import java.util.Objects;
+import java.util.Random;
 import java.util.Scanner;
 
 public class Display {
@@ -15,14 +17,12 @@ public class Display {
         System.out.println("         BEM-VINDO À BATALHA NAVAL!");
         System.out.println("---------------------------------------------");
 
-        TableCells[][] table = game.getTable();
-
         try(Scanner in = new Scanner(System.in)){
 
             System.out.print("# Dê um nome à sua tropa de navios: ");
-            game.setArmyName(in.nextLine());
+            game.player.armyName = in.nextLine();
 
-            printTable(table, false);
+            printTable(game.table, false);
 
             String ans;
             do{
@@ -32,7 +32,7 @@ public class Display {
 
             if (ans.equals("S")){
                 for (int i = 0; i < 10; i++){
-                    table = game.autoPlaceShip();
+                    game.placeShip(game.player, game.player.addShip(AutoGenerator.generateFreeCoords(game.table, TableCells.PLAYER_SHIP)));
                 }
             }
             else{
@@ -40,8 +40,8 @@ public class Display {
                     do {
                         try {
                             System.out.printf("# Posicione seu %d° navio: ", i + 1);
-                            table = game.placeShip(in.next());
-                            printTable(table, false);
+                            game.placeShip(game.player, game.player.addShip(validateCoords(in.next())));
+                            printTable(game.table, false);
                             break;
                         } catch (InvalidCoordsException err) {
                             System.out.println(err.message);
@@ -50,20 +50,19 @@ public class Display {
                 }
             }
 
-            System.out.println("Posicionando navios do adversário...");
+            System.out.println("# Posicionando navios do adversário...");
             game.placeComputerShips();
 
-            boolean finished = false;
-            while(!finished){
-                printTable(table, false);
-                System.out.printf("%s: %d%n", game.getArmyName(), game.getNumberOfPlayerShips());
-                System.out.printf("Tropa inimiga: %d%n", game.getNumberOfComputerShips());
+            while(!game.finished){
+                printTable(game.table, false);
+                System.out.printf("%s: %d%n", game.player.armyName, game.player.getNumberOfRemainingShips());
+                System.out.printf("Tropa inimiga: %d%n", game.computer.getNumberOfRemainingShips());
 
                 do {
                     try {
                         System.out.println("");
                         System.out.print("# Onde você deseja atacar? ");
-                        finished = game.play(in.next());
+                        game.newPlay(validateCoords(in.next()));
                         break;
                     } catch (InvalidCoordsException err) {
                         System.out.println(err.message);
@@ -71,11 +70,33 @@ public class Display {
                 }while (true);
             }
 
-            printTable(game.getTable(), true);
-
+            printTable(game.table, true);
         }
 
     }
+
+    private static Coords validateCoords(String coords) throws InvalidCoordsException{
+        if (coords.length() != 2)
+            throw new InvalidCoordsException("Coordenadas inválidas");
+
+        int coordsX = switchLetterToCorrespondentInt(coords.toUpperCase().charAt(0));
+        if (coordsX == 10)
+            throw new InvalidCoordsException("Coordenada X inválida");
+
+        int coordsY;
+
+        try{
+            coordsY = Integer.parseInt(Character.toString(coords.charAt(1)));
+        }catch (NumberFormatException err){
+            throw new InvalidCoordsException("Coordenada Y inválida");
+        }catch (StringIndexOutOfBoundsException err){
+            throw new InvalidCoordsException("Coordenadas inválidas");
+        }
+
+        return new Coords(coordsX, coordsY);
+    }
+
+
 
     private static void printTable(TableCells[][] table, boolean gameEnded){
         printTableHeader(gameEnded);
@@ -89,25 +110,20 @@ public class Display {
                 if (Objects.isNull(table[i][j]))
                     printable = TableCells.WATER;
                 else
-                    printable = gameEnded ? showAllShips(table[i][j], new Coords(i, j)) : hideGameControls(table[i][j]);
+                    printable = gameEnded ? showAllShips(table[i][j], new Coords(i, j)) : hideComputerShips(table[i][j]);
 
                 System.out.printf(" %s |", printable);
             }
             System.out.println("");
         }
 
-//        System.out.println("Ataques do computador: ");
-//        for (Play play : game.computerAttacks){
-//            if (Objects.isNull(play)) break;
-//            System.out.printf("%d%d - %b%n", play.coordsX, play.coordsY, play.computerRightShot);
-//        }
     }
 
     private static void printTableHeader(boolean gameEnded) {
         System.out.println("---------------------------------------------");
 
         if (gameEnded){
-            if (game.getWinner() != "computer") {
+            if (game.winner == game.player) {
                 System.out.println("           PARABÉNS! VOCÊ VENCEU!");
             }
             else {
@@ -120,7 +136,8 @@ public class Display {
         System.out.println("---------------------------------------------");
     }
 
-    private static TableCells hideGameControls(TableCells cell) {
+    private static TableCells hideComputerShips(TableCells cell) {
+
         if (cell == TableCells.COMPUTER_SHIP){
             return TableCells.WATER;
         }else if (cell == TableCells.BOTH_SHIPS){
@@ -131,25 +148,51 @@ public class Display {
     }
 
     private static TableCells showAllShips(TableCells cell, Coords coords){
-        for (Attack attack : game.computerAttacks){ // mapear os ataques certos do computador para recolocar os navios lá
-            if (Objects.isNull(attack)) break;
-            if (attack.coords.X == coords.X && attack.coords.Y == coords.Y) {
 
-                if (attack.computerRightShot == true) {
-                    return TableCells.PLAYER_SHIP; // if both ships are here and computer shot first, the cell will have only the computer's ship, so when the player hits it, it will then be marked as just a critical attack by the player
+        for (int i = 0; i < 10; i++){
+            if (!Objects.isNull(game.coordsWithBothShips[i])) {
+                if (game.coordsWithBothShips[i].X == coords.X && game.coordsWithBothShips[i].Y == coords.Y) {
+                    return TableCells.BOTH_SHIPS;
                 }
+            }
+            else if (game.player.ships[i].coords.X == coords.X && game.player.ships[i].coords.Y == coords.Y){
+                return TableCells.PLAYER_SHIP;
+            }
+            else if (game.computer.ships[i].coords.X == coords.X && game.computer.ships[i].coords.Y == coords.Y){
+                return TableCells.COMPUTER_SHIP;
             }
         }
 
-        if (cell == TableCells.CRITICAL_ATTACK){
-            return TableCells.COMPUTER_SHIP;
-        }else if (cell == TableCells.SHIP_AND_CRITICAL_ATTACK){
-            return TableCells.BOTH_SHIPS;
-        }else if (cell == TableCells.SHIP_AND_MISSED_ATTACK){
-            return TableCells.PLAYER_SHIP;
-        }else{
-            return cell;
+        return cell;
+    }
+
+    private static int switchLetterToCorrespondentInt(char letter){
+
+        switch (letter){
+            case 'A':
+                return 0;
+            case 'B':
+                return 1;
+            case 'C':
+                return 2;
+            case 'D':
+                return 3;
+            case 'E':
+                return 4;
+            case 'F':
+                return 5;
+            case 'G':
+                return 6;
+            case 'H':
+                return 7;
+            case 'I':
+                return 8;
+            case 'J':
+                return 9;
+            default:
+                return 10;
         }
+
     }
 
     private static String switchIntToCorrespondentLetter(int i){
