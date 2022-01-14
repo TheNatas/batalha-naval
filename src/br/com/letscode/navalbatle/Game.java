@@ -5,12 +5,12 @@ import br.com.letscode.navalbatle.exceptions.InvalidCoordsException;
 import java.util.Objects;
 import java.util.Random;
 
-public class Table {
+public class Game {
 
     protected static TableCells[][] table = new TableCells[10][10];
     protected static int numberOfPlayerShips = 0;
     protected static int numberOfComputerShips = 0;
-    public Play[] computerAttacks = new Play[100];
+    public Attack[] computerAttacks = new Attack[100];
     private String armyName;
     private String winner;
 
@@ -37,11 +37,11 @@ public class Table {
     private final Random rand = new Random();
 
     public TableCells[][] placeShip(String coords) throws InvalidCoordsException{
-        int[] checkedCoords = this.checkCoordsValidity(coords);
+        Coords checkedCoords = this.checkCoordsValidity(coords);
 
-        if (table[checkedCoords[0]][checkedCoords[1]] == TableCells.PLAYER_SHIP) throw new InvalidCoordsException("Você já tem um navio nessas coordenadas");
+        if (table[checkedCoords.X][checkedCoords.Y] == TableCells.PLAYER_SHIP) throw new InvalidCoordsException("Você já tem um navio nessas coordenadas");
 
-        table[checkedCoords[0]][checkedCoords[1]] = TableCells.PLAYER_SHIP;
+        table[checkedCoords.X][checkedCoords.Y] = TableCells.PLAYER_SHIP;
         numberOfPlayerShips++;
 
         return table;
@@ -71,7 +71,7 @@ public class Table {
         return new int[]{shipCoordsX, shipCoordsY};
     }
 
-    private int[] checkCoordsValidity(String coords) throws InvalidCoordsException{
+    private Coords checkCoordsValidity(String coords) throws InvalidCoordsException{
         if (coords.length() != 2) throw new InvalidCoordsException("Coordenadas inválidas");
 
         int coordsX = this.switchLetterToCorrespondentInt(coords.toUpperCase().charAt(0));
@@ -85,7 +85,7 @@ public class Table {
             throw new InvalidCoordsException("Coordenadas inválidas");
         }
 
-        return new int[]{coordsX, coordsY};
+        return new Coords(coordsX, coordsY);
     }
 
     public void placeComputerShips(){
@@ -105,14 +105,14 @@ public class Table {
     }
 
     public boolean play(String shipCoords) throws InvalidCoordsException{
-        int[] checkedCoords = this.checkCoordsValidity(shipCoords);
-        boolean alreadyAttackedHere = this.table[checkedCoords[0]][checkedCoords[1]] == TableCells.MISSED_ATTACK || this.table[checkedCoords[0]][checkedCoords[1]] == TableCells.CRITICAL_ATTACK || this.table[checkedCoords[0]][checkedCoords[1]] == TableCells.SHIP_AND_MISSED_ATTACK || this.table[checkedCoords[0]][checkedCoords[1]] == TableCells.SHIP_AND_CRITICAL_ATTACK;
+        Coords checkedCoords = this.checkCoordsValidity(shipCoords);
+        boolean alreadyAttackedHere = this.table[checkedCoords.X][checkedCoords.Y] == TableCells.MISSED_ATTACK || this.table[checkedCoords.X][checkedCoords.Y] == TableCells.CRITICAL_ATTACK || this.table[checkedCoords.X][checkedCoords.Y] == TableCells.SHIP_AND_MISSED_ATTACK || this.table[checkedCoords.X][checkedCoords.Y] == TableCells.SHIP_AND_CRITICAL_ATTACK;
 
         if (alreadyAttackedHere){
             throw new InvalidCoordsException("Você já atacou aqui");
         }
 
-        new Play(checkedCoords[0], checkedCoords[1], TableCells.COMPUTER_SHIP);
+        new Attack(checkedCoords, TableCells.COMPUTER_SHIP);
 
         if (this.numberOfComputerShips == 0) {
             this.winner = this.armyName;
@@ -131,16 +131,16 @@ public class Table {
             coordsX = rand.nextInt(10);
             coordsY = rand.nextInt(10);
 
-            for (Play play : computerAttacks){
-                if (Objects.isNull(play))
+            for (Attack attack : computerAttacks){
+                if (Objects.isNull(attack))
                     break;
-                alreadyAttackedHere = play.coordsX == coordsX && play.coordsY == coordsY;
+                alreadyAttackedHere = attack.coords.X == coordsX && attack.coords.Y == coordsY;
             }
         }while (alreadyAttackedHere);
 
         for (int i = 0; true; i++){
             if (Objects.isNull(computerAttacks[i])) {
-                computerAttacks[i] = new Play(coordsX, coordsY, TableCells.PLAYER_SHIP);
+                computerAttacks[i] = new Attack(new Coords(coordsX, coordsY), TableCells.PLAYER_SHIP);
                 break;
             }
         }

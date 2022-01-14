@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 public class Display {
 
-    private static final Table ctrl = new Table();
+    private static final Game game = new Game();
 
     public static void main(String[] args) {
 
@@ -15,12 +15,12 @@ public class Display {
         System.out.println("         BEM-VINDO À BATALHA NAVAL!");
         System.out.println("---------------------------------------------");
 
-        TableCells[][] table = ctrl.getTable();
+        TableCells[][] table = game.getTable();
 
         try(Scanner in = new Scanner(System.in)){
 
             System.out.print("# Dê um nome à sua tropa de navios: ");
-            ctrl.setArmyName(in.nextLine());
+            game.setArmyName(in.nextLine());
 
             printTable(table, false);
 
@@ -32,7 +32,7 @@ public class Display {
 
             if (ans.equals("S")){
                 for (int i = 0; i < 10; i++){
-                    table = ctrl.autoPlaceShip();
+                    table = game.autoPlaceShip();
                 }
             }
             else{
@@ -40,7 +40,7 @@ public class Display {
                     do {
                         try {
                             System.out.printf("# Posicione seu %d° navio: ", i + 1);
-                            table = ctrl.placeShip(in.next());
+                            table = game.placeShip(in.next());
                             printTable(table, false);
                             break;
                         } catch (InvalidCoordsException err) {
@@ -51,19 +51,19 @@ public class Display {
             }
 
             System.out.println("Posicionando navios do adversário...");
-            ctrl.placeComputerShips();
+            game.placeComputerShips();
 
             boolean finished = false;
             while(!finished){
                 printTable(table, false);
-                System.out.printf("%s: %d%n", ctrl.getArmyName(), ctrl.getNumberOfPlayerShips());
-                System.out.printf("Tropa inimiga: %d%n", ctrl.getNumberOfComputerShips());
+                System.out.printf("%s: %d%n", game.getArmyName(), game.getNumberOfPlayerShips());
+                System.out.printf("Tropa inimiga: %d%n", game.getNumberOfComputerShips());
 
                 do {
                     try {
                         System.out.println("");
                         System.out.print("# Onde você deseja atacar? ");
-                        finished = ctrl.play(in.next());
+                        finished = game.play(in.next());
                         break;
                     } catch (InvalidCoordsException err) {
                         System.out.println(err.message);
@@ -71,7 +71,7 @@ public class Display {
                 }while (true);
             }
 
-            printTable(ctrl.getTable(), true);
+            printTable(game.getTable(), true);
 
         }
 
@@ -89,7 +89,7 @@ public class Display {
                 if (Objects.isNull(table[i][j]))
                     printable = TableCells.WATER;
                 else
-                    printable = gameEnded ? showAllShips(table[i][j], i, j) : hideGameControls(table[i][j]);
+                    printable = gameEnded ? showAllShips(table[i][j], new Coords(i, j)) : hideGameControls(table[i][j]);
 
                 System.out.printf(" %s |", printable);
             }
@@ -97,7 +97,7 @@ public class Display {
         }
 
 //        System.out.println("Ataques do computador: ");
-//        for (Play play : ctrl.computerAttacks){
+//        for (Play play : game.computerAttacks){
 //            if (Objects.isNull(play)) break;
 //            System.out.printf("%d%d - %b%n", play.coordsX, play.coordsY, play.computerRightShot);
 //        }
@@ -107,7 +107,7 @@ public class Display {
         System.out.println("---------------------------------------------");
 
         if (gameEnded){
-            if (ctrl.getWinner() != "computer") {
+            if (game.getWinner() != "computer") {
                 System.out.println("           PARABÉNS! VOCÊ VENCEU!");
             }
             else {
@@ -130,13 +130,13 @@ public class Display {
         }
     }
 
-    private static TableCells showAllShips(TableCells cell, int coordsX, int coordsY){
-        for (Play play : ctrl.computerAttacks){ // mapear os ataques certos do computador para recolocar os navios lá
-            if (Objects.isNull(play)) break;
-            if (play.coordsX == coordsX && play.coordsY == coordsY) {
+    private static TableCells showAllShips(TableCells cell, Coords coords){
+        for (Attack attack : game.computerAttacks){ // mapear os ataques certos do computador para recolocar os navios lá
+            if (Objects.isNull(attack)) break;
+            if (attack.coords.X == coords.X && attack.coords.Y == coords.Y) {
 
-                if (play.computerRightShot == true) {
-                    return TableCells.PLAYER_SHIP;
+                if (attack.computerRightShot == true) {
+                    return TableCells.PLAYER_SHIP; // if both ships are here and computer shot first, the cell will have only the computer's ship, so when the player hits it, it will then be marked as just a critical attack by the player
                 }
             }
         }
