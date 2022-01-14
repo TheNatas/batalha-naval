@@ -14,7 +14,6 @@ public class Computer extends Player implements Attack{
 
         for (int i = 0; true; i++){
             if (Objects.isNull(this.attacks[i])) {
-                coords = AutoGenerator.generateAttack(this);
                 this.attacks[i] = coords;
                 break;
             }

@@ -15,8 +15,6 @@ public class Game {
     boolean finished = false;
     public Player winner;
 
-    private final Random rand = new Random();
-
     public void placeShip(Player currentPlayer, Ship ship) throws InvalidCoordsException{
 
         boolean playerShipAlreadyHere = this.table[ship.coords.X][ship.coords.Y] == TableCells.PLAYER_SHIP;
@@ -49,6 +47,7 @@ public class Game {
 
     public void newPlay(Coords coords) throws InvalidCoordsException{
 
+        // player attack
         this.table = player.attack(this.table, coords);
         this.finished = isGameOver(computer, coords);
         if (finished) {
@@ -56,8 +55,10 @@ public class Game {
             return;
         }
 
-        this.table = computer.attack(this.table, coords);
-        this.finished = isGameOver(player, coords);
+        // computer attack
+        Coords randomCoords = AutoGenerator.generateAttack(computer);
+        this.table = computer.attack(this.table, randomCoords);
+        this.finished = isGameOver(player, randomCoords);
         if (finished) {
             this.winner = computer;
             return;

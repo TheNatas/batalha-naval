@@ -2,6 +2,8 @@ package br.com.letscode.navalbatle;
 
 import br.com.letscode.navalbatle.exceptions.InvalidCoordsException;
 
+import java.util.Objects;
+
 public class HumanPlayer extends Player implements Attack{
 
     public HumanPlayer(){
@@ -14,6 +16,13 @@ public class HumanPlayer extends Player implements Attack{
 
         if (alreadyAttackedHere){
             throw new InvalidCoordsException("Você já atacou aqui");
+        }
+
+        for (int i = 0; true; i++){
+            if (Objects.isNull(this.attacks[i])) {
+                this.attacks[i] = coords;
+                break;
+            }
         }
 
         TableCells coordsContent = table[coords.X][coords.Y];
