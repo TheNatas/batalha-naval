@@ -4,7 +4,6 @@ import br.com.letscode.navalbatle.exceptions.InvalidCoordsException;
 import br.com.letscode.navalbatle.helpers.AutoGenerator;
 
 import java.util.Objects;
-import java.util.Random;
 import java.util.Scanner;
 
 public class Display {
@@ -22,7 +21,7 @@ public class Display {
             System.out.print("# Dê um nome à sua tropa de navios: ");
             game.player.armyName = in.nextLine();
 
-            printTable(game.table, false);
+            printTable(false);
 
             String ans;
             do{
@@ -41,7 +40,7 @@ public class Display {
                         try {
                             System.out.printf("# Posicione seu %d° navio: ", i + 1);
                             game.placeShip(game.player, game.player.addShip(validateCoords(in.next())));
-                            printTable(game.table, false);
+                            printTable(false);
                             break;
                         } catch (InvalidCoordsException err) {
                             System.out.println(err.message);
@@ -54,7 +53,7 @@ public class Display {
             game.placeComputerShips();
 
             while(!game.finished){
-                printTable(game.table, false);
+                printTable(false);
                 System.out.printf("%s: %d%n", game.player.armyName, game.player.getNumberOfRemainingShips());
                 System.out.printf("Tropa inimiga: %d%n", game.computer.getNumberOfRemainingShips());
 
@@ -70,7 +69,7 @@ public class Display {
                 }while (true);
             }
 
-            printTable(game.table, true);
+            printTable(true);
         }
 
     }
@@ -98,19 +97,19 @@ public class Display {
 
 
 
-    private static void printTable(TableCells[][] table, boolean gameEnded){
+    private static void printTable(boolean gameEnded){
         printTableHeader(gameEnded);
         System.out.println("|   | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |");
 
-        for (int i = 0; i < table.length; i++){
+        for (int i = 0; i < game.table.length; i++){
             System.out.printf("| %s |", switchIntToCorrespondentLetter(i));
-            for (int j = 0; j < table[i].length; j++){
+            for (int j = 0; j < game.table[i].length; j++){
 
                 TableCells printable;
-                if (Objects.isNull(table[i][j]))
+                if (Objects.isNull(game.table[i][j]))
                     printable = TableCells.WATER;
                 else
-                    printable = gameEnded ? showAllShips(table[i][j], new Coords(i, j)) : hideComputerShips(table[i][j]);
+                    printable = gameEnded ? showAllShips(game.table[i][j], new Coords(i, j)) : hideComputerShips(game.table[i][j]);
 
                 System.out.printf(" %s |", printable);
             }
